@@ -94,6 +94,8 @@ import org.eclipse.lsp4j.WorkspaceSymbolParams
 import org.eclipse.lsp4j.jsonrpc.ResponseErrorException
 import org.eclipse.lsp4j.jsonrpc.messages
 
+import java.util.logging.Logger
+
 class WorkspaceLspService(
     ec: ExecutionContextExecutorService,
     sh: ju.concurrent.ScheduledExecutorService,
@@ -107,6 +109,8 @@ class WorkspaceLspService(
   implicit val rc: ReportContext = LoggerReportContext
   private val cancelables = new MutableCancelable()
   var httpServer: Option[MetalsHttpServer] = None
+
+  val logger: Logger = Logger.getLogger(classOf[pc.MetalsGlobal].getName)
 
   private val clientConfig =
     ClientConfiguration(
@@ -845,6 +849,7 @@ class WorkspaceLspService(
         ).asJavaObject
 
       case ServerCommands.StartDebugAdapter(params) if params.getData != null =>
+        scribe.error(s"Parameters SDA: $params")
         val targets = params.getTargets().asScala
         folderServices.find(s =>
           targets.forall(s.supportsBuildTarget(_).isDefined)
@@ -882,6 +887,7 @@ class WorkspaceLspService(
           .liftToLspError
           .asJavaObject
       case ServerCommands.StartAttach(params) if params.hostName != null =>
+        scribe.error(s"Parameters SA: ${params.stepFilers.toString()}")
         onFirstSatifying(service =>
           Future.successful(
             service.findBuildTargetByDisplayName(params.buildTarget)

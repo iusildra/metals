@@ -34,6 +34,7 @@ final class TestDebugger(
   @volatile private var breakpoints = new DebuggeeBreakpoints()
 
   @volatile private var failure: Option[Throwable] = None
+  val stepFilters = Array[String]()
 
   def initialize: Future[Capabilities] = {
     Debug.printEnclosing()
@@ -42,12 +43,12 @@ final class TestDebugger(
 
   def launch: Future[Unit] = {
     Debug.printEnclosing()
-    ifNotFailed(debugger.launch(debug = true))
+    ifNotFailed(debugger.launch(debug = true, stepFilters = stepFilters))
   }
 
   def launch(debug: Boolean): Future[Unit] = {
     Debug.printEnclosing()
-    ifNotFailed(debugger.launch(debug))
+    ifNotFailed(debugger.launch(debug, stepFilters = stepFilters))
   }
 
   def configurationDone: Future[Unit] = {

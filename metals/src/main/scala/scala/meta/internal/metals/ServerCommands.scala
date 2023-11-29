@@ -833,6 +833,7 @@ case class DebugUnresolvedAttachRemoteParams(
     hostName: String,
     port: Int,
     buildTarget: String,
+    stepFilers: java.util.List[String],
 )
 
 case class DebugDiscoveryParams(

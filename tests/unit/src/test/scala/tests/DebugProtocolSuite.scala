@@ -420,6 +420,54 @@ class DebugProtocolSuite
     )
   }
 
+  test("hot-code-replace") {
+    // cleanCompileCache("a")
+    // cleanWorkspace()
+    for {
+      _ <- initialize(
+        s"""/metals.json
+           |{
+           |  "a": {}
+           |}
+           |/a/src/main/scala/a/Main.scala
+           |package a
+           |object Main {
+           |  def main(args: Array[String]) = {
+           |    println(1)
+           |    System.exit(0)
+           |  }
+           |}
+           |""".stripMargin
+      )
+      _ <- server.didOpen("a/src/main/scala/a/Main.scala")
+      debugger <-
+        server
+          .startDebuggingUnresolved(
+            new DebugUnresolvedMainClassParams(
+              "a.Main",
+              "a",
+              singletonList("Foo"),
+            ).toJson
+          )
+      _ <- debugger.setBreakpoints(
+        server.toPath("a/src/main/scala/a/Main.scala"),
+        List(4),
+      )
+      output1 <- debugger.allOutput
+      _ <- server.didSave("a/src/main/scala/a/Main.scala") { _ =>
+        """|package a
+           |object Main {
+           |  def main(args: Array[String]) = {
+           |    println(2)
+           |    System.exit(0)
+           |  }
+           |}""".stripMargin
+      }
+      output2 <- debugger.allOutput
+      _ <- debugger.shutdown
+    } yield output1(0) == "1" && output2(0) == "2"
+  }
+
   test("test-unresolved-params") {
     cleanCompileCache("a")
     cleanWorkspace()
