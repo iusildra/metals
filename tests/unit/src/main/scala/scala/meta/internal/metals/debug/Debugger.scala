@@ -44,10 +44,13 @@ final class Debugger(server: RemoteServer)(implicit ec: ExecutionContext) {
     server.initialize(arguments).asScala
   }
 
-  def launch(debug: java.lang.Boolean, stepFilters: Array[String]): Future[Unit] = {
+  def launch(
+      debug: java.lang.Boolean,
+      stepFilters: Array[String],
+  ): Future[Unit] = {
     val arguments = Map[String, AnyRef](
       "noDebug" -> java.lang.Boolean.valueOf(!debug),
-      "stepFilers" -> stepFilters
+      "stepFilers" -> stepFilters,
     )
     server.launch(arguments.asJava).asScala.ignoreValue
   }

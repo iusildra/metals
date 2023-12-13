@@ -11,7 +11,6 @@ import com.google.gson.JsonElement
 import org.eclipse.lsp4j.debug.CompletionsArguments
 import org.eclipse.lsp4j.debug.DisconnectArguments
 import org.eclipse.lsp4j.debug.InitializeRequestArguments
-import org.eclipse.lsp4j.debug.LaunchRequestArguments
 import org.eclipse.lsp4j.debug.OutputEventArguments
 import org.eclipse.lsp4j.debug.SetBreakpointsArguments
 import org.eclipse.lsp4j.debug.SetBreakpointsResponse
@@ -128,10 +127,11 @@ object DebugProtocol {
     def unapply(request: DebugRequestMessage): Option[DebugMode] = {
       if (request.getMethod != "launch") None
       else
-        parse[LaunchRequestArguments](request.getParams).toOption.map {
-          case args if args.getNoDebug => DebugMode.Disabled
-          case _ => DebugMode.Enabled
-        }
+        parse[ScalaDebugLaunchRequestArguments](request.getParams).toOption
+          .map {
+            case args if args.getNoDebug => DebugMode.Disabled
+            case _ => DebugMode.Enabled
+          }
     }
   }
 
